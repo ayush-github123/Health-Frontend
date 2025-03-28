@@ -11,6 +11,11 @@ import Chatbot from "./pages/Chatbot";
 import Register from "./pages/Register";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
+const ProtectedRoute = ({ element }) => {
+  const { isLoggedIn } = useAuth();
+  return isLoggedIn ? element : <Navigate to="/" />;
+};
+
 const AppContent = () => {
   const { isLoggedIn, showLogin, setShowLogin, patientDataAvailable } = useAuth();
 
@@ -21,21 +26,11 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Home onLogin={() => setShowLogin(true)} showLogin={showLogin} />} />
         
-        {/* Redirect users based on authentication & form status */}
         <Route
           path="/dashboard"
-          element={
-            isLoggedIn ? (
-              patientDataAvailable ? <Dashboard /> : <Navigate to="/patient-form" />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
+          element={<ProtectedRoute element={patientDataAvailable ? <Dashboard /> : <Navigate to="/patient-form" />} />}
         />
-        <Route
-          path="/patient-form"
-          element={isLoggedIn ? <PatientForm /> : <Navigate to="/" />}
-        />
+        <Route path="/patient-form" element={<ProtectedRoute element={<PatientForm />} />} />
         
         <Route path="/register" element={<Register />} />
         <Route path="/chatbot" element={<Chatbot showLogin={showLogin} />} />
@@ -49,11 +44,11 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <AppContent />
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 };
 
