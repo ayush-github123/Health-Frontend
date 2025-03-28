@@ -1,0 +1,47 @@
+.chat-container {
+  max-width: 600px;
+  margin: auto;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.messages {
+  margin-bottom: 20px;
+  height: 300px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.user-message {
+  color: blue;
+  text-align: right;
+}
+
+.bot-message {
+  color: green;
+  text-align: left;
+}
+
+input {
+  width: calc(100% - 80px);
+  padding: 10px;
+}
+
+button {
+  width: 70px;
+  padding: 10px;
+  margin-left: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1A2332;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2C3E50;
+  border-radius: 4px;
+}
