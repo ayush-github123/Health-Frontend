@@ -1,45 +1,78 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { Globe, LogIn, LogOut, Home, MessageCircle, AlertTriangle } from "lucide-react";
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Globe, LogIn, LogOut, Home, MessageCircle, AlertTriangle } from 'lucide-react';
+import { FaBlog } from 'react-icons/fa';
 
 const Navbar = () => {
   const { isLoggedIn, handleLogout, setShowLogin } = useAuth();
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
 
   useEffect(() => {
-    const addGoogleTranslateScript = () => {
-      // Check if script already exists to prevent multiple additions
-      if (!document.getElementById('google-translate-script')) {
-        const script = document.createElement("script");
-        script.id = 'google-translate-script';
-        script.type = "text/javascript";
-        script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-        document.body.appendChild(script);
+    // Add custom styling for Google Translate
+    const style = document.createElement('style');
+    style.innerHTML = `
+      /* Clean up Google Translate dropdown styling */
+      .goog-te-gadget {
+        color: white !important;
+        font-family: inherit !important;
       }
-    };
+      
+      .goog-te-gadget-simple {
+        background-color: transparent !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        padding: 5px 8px !important;
+        border-radius: 4px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+      }
+      
+      .goog-te-menu-value {
+        color: white !important;
+        font-size: 14px !important;
+        font-family: inherit !important;
+      }
+      
+      .goog-te-menu-value span {
+        color: white !important;
+        margin-right: 3px !important;
+      }
+      
+      .goog-te-gadget img {
+        display: none !important;
+      }
+      
+      /* Hide unnecessary elements */
+      .goog-te-banner-frame.skiptranslate {
+        display: none !important;
+      }
+      
+      body {
+        top: 0px !important;
+      }
+    `;
+    document.head.appendChild(style);
 
-    window.googleTranslateElementInit = function () {
-      new window.google.translate.TranslateElement({
-        pageLanguage: "en", 
-        includedLanguages: "en,hi,es,fr,de,zh", 
-        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
-      }, "google_translate_element");
+    // Initialize Google Translate
+    if (window.googleTranslateElementInit) return; // prevents re-initializing
+  
+    window.googleTranslateElementInit = () => {
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: 'en',
+          includedLanguages: 'en,hi,fr,es,zh,de',
+          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false
+        },
+        'google_translate_element'
+      );
     };
-
-    addGoogleTranslateScript();
+  
+    const script = document.createElement('script');
+    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.async = true;
+    document.body.appendChild(script);
   }, []);
-
-  // Function to handle language change
-  const changeLanguage = (lang) => {
-    setSelectedLanguage(lang);
-    const googleTranslateSelect = document.querySelector(".goog-te-combo");
-    if (googleTranslateSelect) {
-      googleTranslateSelect.value = lang;
-      googleTranslateSelect.dispatchEvent(new Event("change"));
-    }
-  };
-
+  
   return (
     <nav className="bg-gradient-to-r from-blue-700 to-blue-900 p-4 text-white shadow-lg">
       <div className="container mx-auto flex justify-between items-center">
@@ -48,64 +81,45 @@ const Navbar = () => {
           className="text-2xl font-bold flex items-center space-x-2 hover:text-gray-200 transition duration-300"
         >
           <Globe className="w-7 h-7" />
-          <span>Healthcare AI</span>
+          <span>Health Bridge</span>
         </Link>
         
         <div className="flex items-center space-x-6">
           {/* Navigation Links */}
           <div className="flex items-center space-x-4">
-            <Link 
-              to="/" 
-              className="flex items-center space-x-1 hover:text-gray-200 transition duration-300"
-            >
+            <Link to="/" className="flex items-center space-x-1 hover:text-gray-200 transition duration-300">
               <Home className="w-5 h-5" />
               <span>Home</span>
             </Link>
-            
+
             {isLoggedIn && (
-              <Link 
-                to="/dashboard" 
-                className="hover:text-gray-200 transition duration-300"
-              >
+              <Link to="/dashboard" className="hover:text-gray-200 transition duration-300">
                 Dashboard
               </Link>
             )}
 
-            <Link 
-              to="/chatbot" 
-              className="flex items-center space-x-1 hover:text-gray-200 transition duration-300"
-            >
+            <Link to="/chatbot" className="flex items-center space-x-1 hover:text-gray-200 transition duration-300">
               <MessageCircle className="w-5 h-5" />
               <span>Chatbot</span>
             </Link>
 
-            <Link 
-              to="/emergency" 
-              className="flex items-center space-x-1 bg-red-600 px-3 py-1 rounded-full hover:bg-red-700 transition duration-300"
-            >
+            <Link to="/emergency" className="flex items-center space-x-1 bg-red-600 px-3 py-1 rounded-full hover:bg-red-700 transition duration-300">
               <AlertTriangle className="w-5 h-5" />
               <span>Emergency</span>
             </Link>
           </div>
 
-          {/* Language Selector */}
-          <div className="flex items-center space-x-2">
-            <Globe className="w-5 h-5 text-gray-300" />
-            <select 
-              value={selectedLanguage} 
-              onChange={(e) => changeLanguage(e.target.value)}
-              className="bg-blue-800 text-white p-2 rounded-md text-sm border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="en">English</option>
-              <option value="hi">Hindi</option>
-              <option value="es">Spanish</option>
-              <option value="fr">French</option>
-              <option value="de">German</option>
-              <option value="zh">Chinese</option>
-            </select>
+          <Link to="/blogs" className="flex items-center space-x-1 hover:text-gray-200 transition duration-300">
+            <FaBlog />
+            <span>Blog</span>
+          </Link>
+          
+          {/* Properly styled translation element */}
+          <div className="flex items-center bg-blue-800 bg-opacity-50 px-2 py-1 rounded-lg border border-blue-600">
+            <div id="google_translate_element"></div>
           </div>
 
-          {/* Authentication Buttons */}
+          {/* Auth Buttons */}
           <div className="flex items-center space-x-2">
             {!isLoggedIn ? (
               <button 
@@ -127,9 +141,6 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-
-      {/* Google Translate Hidden Div */}
-      <div id="google_translate_element" className="hidden"></div>
     </nav>
   );
 };

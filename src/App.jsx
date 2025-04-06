@@ -10,6 +10,8 @@ import Emergency from "./pages/Emergency";
 import Chatbot from "./pages/Chatbot";
 import Register from "./pages/Register";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import BlogPage from "./blog/BlogPage";
+import BlogDetails from "./blog/BlogDetails";
 
 const ProtectedRoute = ({ element }) => {
   const { isLoggedIn } = useAuth();
@@ -34,6 +36,8 @@ const AppContent = () => {
         
         <Route path="/register" element={<Register />} />
         <Route path="/chatbot" element={<Chatbot showLogin={showLogin} />} />
+        <Route path="/blogs" element={<BlogPage />} />
+        <Route path="/blogs/:id" element={<BlogDetails />} />
         <Route path="/emergency" element={<Emergency />} />
         
         <Route path="*" element={<NotFound />} />

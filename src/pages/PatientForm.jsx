@@ -39,11 +39,46 @@ const PatientForm = () => {
 
   // State to manage form section visibility
   const [activeSection, setActiveSection] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!isLoggedIn) {
       navigate("/login");
+      return;
     }
+
+    // Fetch existing patient data when component mounts
+    const fetchPatientData = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get("https://health-backend-gjoo.onrender.com/healthcare/form/data/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (response.data) {
+          // Transform API response to match formData structure if needed
+          setFormData(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching patient data:", error);
+        // If there's cached data in localStorage, use that as fallback
+        const cachedData = localStorage.getItem("patientData");
+        if (cachedData) {
+          setFormData(JSON.parse(cachedData));
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPatientData();
   }, [isLoggedIn, navigate]);
 
   const handleChange = (e) => {
@@ -106,6 +141,15 @@ const PatientForm = () => {
     "Lakshadweep", "Delhi", "Puducherry", "Ladakh", "Jammu and Kashmir"
   ];
   
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-[600px] text-center">
+          <p>Loading patient data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -219,6 +263,20 @@ const PatientForm = () => {
                 onChange={handleChange} 
                 className="w-full mb-4 p-2 border rounded"
               ></textarea>
+              <textarea 
+                name="vaccination_history" 
+                value={formData.vaccination_history}
+                placeholder="Vaccination History" 
+                onChange={handleChange} 
+                className="w-full mb-4 p-2 border rounded"
+              ></textarea>
+              <textarea 
+                name="accessibility_needs" 
+                value={formData.accessibility_needs}
+                placeholder="Accessibility Needs" 
+                onChange={handleChange} 
+                className="w-full mb-4 p-2 border rounded"
+              ></textarea>
             </div>
           )}
 
@@ -264,6 +322,20 @@ const PatientForm = () => {
                 </select>
               </div>
 
+              <div className="mb-4">
+                <label className="block mb-2">Pregnancy Status</label>
+                <select 
+                  name="pregnancy_status" 
+                  value={formData.pregnancy_status}
+                  onChange={handleChange} 
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="Not Pregnant">Not Pregnant</option>
+                  <option value="Pregnant">Pregnant</option>
+                  <option value="Not Applicable">Not Applicable</option>
+                </select>
+              </div>
+
               <h4 className="font-semibold mt-4 mb-2">Mental Health Assessment</h4>
               <div className="grid grid-cols-3 gap-4">
                 {["stress", "anxiety", "depression"].map(condition => (
@@ -271,7 +343,7 @@ const PatientForm = () => {
                     <label className="block mb-2 capitalize">{condition}:</label>
                     <select 
                       name={`mental_health_${condition}`} 
-                      value={formData[`mental_health_${condition}`]}
+                      value={formData[`mental_health_${condition}`].toString()}
                       onChange={handleChange} 
                       className="w-full p-2 border rounded"
                     >
